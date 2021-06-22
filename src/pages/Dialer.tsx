@@ -1,12 +1,16 @@
 import React from 'react';
 // import logo from './logo.svg';
-import { makeStyles, Tooltip, TextField, IconButton } from '@material-ui/core';
+import {
+  makeStyles,
+  Tooltip,
+  TextField,
+  IconButton,
+  Paper,
+} from '@material-ui/core';
 import { ThemedFab } from '../components/ThemedFab';
 import CallIcon from '@material-ui/icons/Call';
 import VoicemailIcon from '@material-ui/icons/Voicemail';
-import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
-import MicIcon from '@material-ui/icons/Mic';
 import MicOffIcon from '@material-ui/icons/MicOff';
 import PhonePausedIcon from '@material-ui/icons/PhonePaused';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
@@ -18,19 +22,26 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import SettingsIcon from '@material-ui/icons/Settings';
+import DialpadIcon from '@material-ui/icons/Dialpad';
+import Brightness6Icon from '@material-ui/icons/Brightness6';
 import clsx from 'clsx';
 
 // @see https://material.io/design/sound/applying-sound-to-ui.html#system-sounds
 import pressSound from '../assets/audio/material_product_sounds/wav/02-Alerts-and-Notifications/notification_simple-01.wav';
 import ringSound from '../assets/audio/material_product_sounds/wav/02-Alerts-and-Notifications/alert_simple.wav';
+import { IThemeSettings } from '../App';
 
 const useStyles = makeStyles((theme) => ({
   prompt: {
     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
       border: 'none', // remove hover underline
     },
+    '& .MuiInput-multiline': {
+      lineHeight: 'normal',
+    },
     '& textarea': {
       textAlign: 'center',
+      fontSize: '1.5em',
     },
     '& .MuiInputBase-root::before': {
       border: 'none',
@@ -84,13 +95,53 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   tab: {
-    marginLeft: theme.spacing(0.25),
-    marginRight: theme.spacing(0.25),
+    // marginLeft: theme.spacing(0.25),
+    // marginRight: theme.spacing(0.25),
   },
 }));
 
-export function Dialer() {
-  interface dialButton {
+type TTabType =
+  | 'directory'
+  | 'call-history'
+  | 'dialpad'
+  | 'voicemail'
+  | 'sms'
+  | 'account'
+  | 'reload'
+  | 'help'
+  | 'settings'
+  | 'darkmode';
+
+const tabs: {
+  /** Title for tooltip */
+  title: string;
+  /** List of available tabs */
+  name: TTabType;
+  /** Icon for rendering */
+  Icon: React.FC;
+}[] = [
+  {
+    title: 'Directory',
+    name: 'directory',
+    Icon: SupervisorAccountIcon,
+  },
+  { title: 'Call History', name: 'call-history', Icon: HistoryIcon },
+  { title: 'Dialpad', name: 'dialpad', Icon: DialpadIcon },
+  { title: 'Voicemail', name: 'voicemail', Icon: VoicemailIcon },
+  { title: 'SMS', name: 'sms', Icon: SmsIcon },
+  { title: 'Account', name: 'account', Icon: AccountCircleIcon },
+  { title: 'Reload', name: 'reload', Icon: RotateLeftIcon },
+  { title: 'Help', name: 'help', Icon: HelpOutlineIcon },
+  { title: 'Darkmode', name: 'darkmode', Icon: Brightness6Icon },
+  { title: 'Settings', name: 'settings', Icon: SettingsIcon },
+];
+
+export function Dialer(props: {
+  setThemeSettings: React.Dispatch<React.SetStateAction<IThemeSettings>>;
+}) {
+  const classes = useStyles();
+
+  const dialpad: {
     /** digit/symbol being pressed */
     symbol: string;
     /** Letters under digits */
@@ -99,7 +150,29 @@ export function Dialer() {
     className?: string;
     /** Use HTML character instead of symbol to show digit/symbol */
     char?: string;
-  }
+  }[] = [
+    {
+      className: classes.voicemail,
+      symbol: '1',
+      caption: <VoicemailIcon />,
+    },
+    { symbol: '2', caption: 'ABC' },
+    { symbol: '3', caption: 'DEF' },
+    { symbol: '4', caption: 'GHI' },
+    { symbol: '5', caption: 'JKL' },
+    { symbol: '6', caption: 'MNO' },
+    { symbol: '7', caption: 'PQRS' },
+    { symbol: '8', caption: 'TUV' },
+    { symbol: '9', caption: 'WXYZ' },
+    {
+      className: classes.star,
+      symbol: '*',
+      char: '&lowast;',
+      caption: '',
+    },
+    { symbol: '0', caption: '+' },
+    { symbol: '#', caption: '' },
+  ];
 
   const buttonPressAudioRef: React.LegacyRef<HTMLAudioElement> | undefined =
     React.useRef(null);
@@ -186,10 +259,22 @@ export function Dialer() {
     setPrompt((state) => state.slice(0, state.length - 1));
   };
 
-  const classes = useStyles();
+  const [tabSelected, setTabSelected] = React.useState<TTabType>('dialpad');
+  const tabHandler =
+    (tabName: TTabType) =>
+    (_event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      if (tabName === 'darkmode') {
+        props.setThemeSettings((state) => ({
+          ...state,
+          themeMode: state.themeMode === 'dark' ? 'light' : 'dark',
+        }));
+      } else {
+        setTabSelected(tabName);
+      }
+    };
 
   return (
-    <>
+    <Paper elevation={0}>
       <TextField
         className={classes.prompt}
         value={prompt}
@@ -197,31 +282,7 @@ export function Dialer() {
         multiline={true}
       />
       <ul className={classes.dialer}>
-        {(
-          [
-            {
-              className: classes.voicemail,
-              symbol: '1',
-              caption: <VoicemailIcon />,
-            },
-            { symbol: '2', caption: 'ABC' },
-            { symbol: '3', caption: 'DEF' },
-            { symbol: '4', caption: 'GHI' },
-            { symbol: '5', caption: 'JKL' },
-            { symbol: '6', caption: 'MNO' },
-            { symbol: '7', caption: 'PQRS' },
-            { symbol: '8', caption: 'TUV' },
-            { symbol: '9', caption: 'WXYZ' },
-            {
-              className: classes.star,
-              symbol: '*',
-              char: '&lowast;',
-              caption: '',
-            },
-            { symbol: '0', caption: '+' },
-            { symbol: '#', caption: '' },
-          ] as dialButton[]
-        ).map((item) => (
+        {dialpad.map((item) => (
           <li className={classes.dialerButton} key={item.symbol}>
             <ThemedFab
               className={clsx(classes.fab, item.className)}
@@ -247,7 +308,7 @@ export function Dialer() {
               onClick={pauseHandler}
               aria-label="pause"
             >
-              {paused ? <PlayArrowIcon /> : <PauseIcon />}
+              <PauseIcon color={paused ? undefined : 'disabled'} />
             </ThemedFab>
           ) : (
             <ThemedFab
@@ -278,7 +339,7 @@ export function Dialer() {
               color="transparent"
               aria-label="mute"
             >
-              {mute ? <MicOffIcon /> : <MicIcon />}
+              <MicOffIcon color={mute ? undefined : 'disabled'} />
             </ThemedFab>
           ) : (
             <ThemedFab
@@ -294,49 +355,21 @@ export function Dialer() {
         </li>
       </ul>
       <aside>
-        <Tooltip title="Directory">
-          <IconButton className={classes.tab} aria-label="directory">
-            <SupervisorAccountIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Call History">
-          <IconButton className={classes.tab} aria-label="call-history">
-            <HistoryIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Voicemail">
-          <IconButton className={classes.tab} aria-label="voicemail">
-            <VoicemailIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="SMS">
-          <IconButton className={classes.tab} aria-label="sms">
-            <SmsIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Account">
-          <IconButton className={classes.tab} aria-label="account">
-            <AccountCircleIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Reload">
-          <IconButton className={classes.tab} aria-label="reload">
-            <RotateLeftIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Help">
-          <IconButton className={classes.tab} aria-label="help">
-            <HelpOutlineIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Settings">
-          <IconButton className={classes.tab} aria-label="settings">
-            <SettingsIcon />
-          </IconButton>
-        </Tooltip>
+        {tabs.map((tab) => (
+          <Tooltip key={tab.name} title={tab.title}>
+            <IconButton
+              className={classes.tab}
+              aria-label={tab.name}
+              onClick={tabHandler(tab.name)}
+              color={tabSelected === tab.name ? 'primary' : 'default'}
+            >
+              <tab.Icon />
+            </IconButton>
+          </Tooltip>
+        ))}
       </aside>
       <audio id="audio" ref={buttonPressAudioRef} src={pressSound}></audio>
       <audio id="audio" ref={ringAudioRef} src={ringSound}></audio>
-    </>
+    </Paper>
   );
 }

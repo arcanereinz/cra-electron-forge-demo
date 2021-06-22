@@ -25,7 +25,7 @@ const useStyles = makeStyles<Theme>((theme) =>
     transparent: {
       boxShadow: 'none',
       backgroundColor: theme.palette.background.paper,
-      color: theme.palette.success.contrastText,
+      color: theme.palette.text.primary,
       '&:hover': {
         backgroundColor: theme.palette.background.default,
       },
