@@ -13,13 +13,13 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import SettingsIcon from '@material-ui/icons/Settings';
 import DialpadIcon from '@material-ui/icons/Dialpad';
 import Brightness6Icon from '@material-ui/icons/Brightness6';
+
 import { IThemeSettings } from '../App';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
-  tab: {
-    // marginLeft: theme.spacing(0.25),
-    // marginRight: theme.spacing(0.25),
-  },
+  root: {},
+  tab: {},
 }));
 
 type TTabType =
@@ -120,11 +120,11 @@ export function Dialnav(props: {
     };
 
   return (
-    <div className={props.className}>
-      {tabs.map((tab) => (
-        <Tooltip key={tab.name} title={tab.title}>
-          {tab.internalUrl ? (
-            <NavLink to={tab.internalUrl}>
+    <div className={clsx(classes.root, props.className)}>
+      {tabs.map((tab) =>
+        tab.internalUrl ? (
+          <NavLink to={tab.internalUrl}>
+            <Tooltip key={tab.name} title={tab.title}>
               <IconButton
                 className={classes.tab}
                 aria-label={tab.name}
@@ -133,8 +133,23 @@ export function Dialnav(props: {
               >
                 <tab.Icon />
               </IconButton>
-            </NavLink>
-          ) : (
+            </Tooltip>
+          </NavLink>
+        ) : tab.externalUrl ? (
+          <a href={tab.externalUrl} target="_blank" rel="noreferrer">
+            <Tooltip key={tab.name} title={tab.title}>
+              <IconButton
+                className={classes.tab}
+                aria-label={tab.name}
+                onClick={tabHandler(tab.name)}
+                color={tabSelected === tab.name ? 'primary' : 'default'}
+              >
+                <tab.Icon />
+              </IconButton>
+            </Tooltip>
+          </a>
+        ) : (
+          <Tooltip key={tab.name} title={tab.title}>
             <IconButton
               className={classes.tab}
               aria-label={tab.name}
@@ -143,9 +158,9 @@ export function Dialnav(props: {
             >
               <tab.Icon />
             </IconButton>
-          )}
-        </Tooltip>
-      ))}
+          </Tooltip>
+        ),
+      )}
     </div>
   );
 }

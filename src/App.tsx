@@ -1,7 +1,6 @@
 import React from 'react';
 // import logo from './logo.svg';
 import './App.css';
-import { Dialpad } from './pages/dialpad/Dialpad';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import {
   makeStyles,
@@ -9,15 +8,22 @@ import {
   ThemeProvider,
   CssBaseline,
   Paper,
+  darken,
 } from '@material-ui/core';
-import { Dialnav } from './components/Dialnav';
+
 import clsx from 'clsx';
+
+import { Dialpad } from './pages/dialpad/Dialpad';
+import { Dialnav } from './components/Dialnav';
 import { Directory } from './pages/directory/Directory';
 import { Account } from './pages/account/Account';
 import { Settings } from './pages/settings/Settings';
 import { CallHistory } from './pages/call-history/CallHistory';
 import { Sms } from './pages/sms/Sms';
 import { Voicemail } from './pages/voicemail/Voicemail';
+
+import { TopNav } from './components/TopNav';
+import { LeftDrawer } from './components/LeftDrawer';
 
 export interface IThemeSettings {
   themeMode: 'dark' | 'light';
@@ -31,6 +37,12 @@ const theme = (themeSettings: IThemeSettings) =>
      */
     palette: {
       type: themeSettings.themeMode,
+      primary: {
+        main:
+          themeSettings.themeMode === 'dark'
+            ? darken(defaultTheme.palette.primary.main, 0.75)
+            : defaultTheme.palette.primary.main,
+      },
       success: {
         // light: will be calculated from palette.primary.main,
         main: defaultTheme.palette.success.main,
@@ -49,7 +61,8 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   main: {
-    minHeight: '400px',
+    minWidth: 252,
+    minHeight: 400,
   },
   nav: {
     textAlign: 'center',
@@ -58,6 +71,15 @@ const useStyles = makeStyles((theme) => ({
 
 function App(props: { basename: string }) {
   const classes = useStyles();
+
+  const [openDrawer, setOpenDrawer] = React.useState(false);
+  const drawerHandler = () => setOpenDrawer((state) => !state);
+
+  const [hideControls, setHideControls] = React.useState(false);
+  const handleHideControls = () => {
+    setHideControls((state) => !state);
+  };
+
   const [themeSettings, setThemeSettings] = React.useState<IThemeSettings>({
     themeMode: 'light',
   });
@@ -68,7 +90,11 @@ function App(props: { basename: string }) {
         <CssBaseline /* darken background */ />
         <div className={clsx('App', classes.root)}>
           <Paper elevation={0}>
-            <header className="App-header"></header>
+            <TopNav
+              hideControls={hideControls}
+              handleHideControls={handleHideControls}
+              drawerHandler={drawerHandler}
+            />
             <main className={classes.main}>
               <Switch>
                 <Route path="/account">
@@ -98,8 +124,9 @@ function App(props: { basename: string }) {
               </Switch>
             </main>
             <nav className={classes.nav}>
-              <Dialnav setThemeSettings={setThemeSettings} />
+              {!hideControls && <Dialnav setThemeSettings={setThemeSettings} />}
             </nav>
+            <LeftDrawer openDrawer={openDrawer} drawerHandler={drawerHandler} />
           </Paper>
         </div>
       </ThemeProvider>

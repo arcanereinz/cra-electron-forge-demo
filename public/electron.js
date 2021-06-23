@@ -21,7 +21,7 @@ function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
     width: 252,
-    height: 524,
+    height: 574, // add 50 for AppBar
     webPreferences: {
       nodeIntegration: true,
     },
