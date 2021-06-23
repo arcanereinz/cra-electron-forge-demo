@@ -6,7 +6,7 @@ import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <React.Fragment>
-    <App />
+    <App basename={process.env.PUBLIC_URL} />
   </React.Fragment>,
   document.getElementById('root'),
 );

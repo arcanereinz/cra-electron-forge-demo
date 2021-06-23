@@ -1,8 +1,23 @@
 import React from 'react';
 // import logo from './logo.svg';
 import './App.css';
-import { makeStyles, createMuiTheme, ThemeProvider } from '@material-ui/core';
-import { Dialer } from './pages/Dialer';
+import { Dialpad } from './pages/dialpad/Dialpad';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import {
+  makeStyles,
+  createMuiTheme,
+  ThemeProvider,
+  CssBaseline,
+  Paper,
+} from '@material-ui/core';
+import { Dialnav } from './components/Dialnav';
+import clsx from 'clsx';
+import { Directory } from './pages/directory/Directory';
+import { Account } from './pages/account/Account';
+import { Settings } from './pages/settings/Settings';
+import { CallHistory } from './pages/call-history/CallHistory';
+import { Sms } from './pages/sms/Sms';
+import { Voicemail } from './pages/voicemail/Voicemail';
 
 export interface IThemeSettings {
   themeMode: 'dark' | 'light';
@@ -26,30 +41,69 @@ const theme = (themeSettings: IThemeSettings) =>
   });
 
 const useStyles = makeStyles((theme) => ({
-  main: {
+  root: {
     width: 'min-content',
-    minWidth: '15em',
+    minWidth: '18em',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
   },
+  main: {
+    minHeight: '400px',
+  },
+  nav: {
+    textAlign: 'center',
+  },
 }));
 
-function App() {
+function App(props: { basename: string }) {
+  const classes = useStyles();
   const [themeSettings, setThemeSettings] = React.useState<IThemeSettings>({
     themeMode: 'light',
   });
-  const classes = useStyles();
 
   return (
-    <ThemeProvider theme={theme(themeSettings)}>
-      <div className="App">
-        <header className="App-header"></header>
-        <main className={classes.main}>
-          <Dialer setThemeSettings={setThemeSettings} />
-        </main>
-      </div>
-    </ThemeProvider>
+    <BrowserRouter basename={props.basename}>
+      <ThemeProvider theme={theme(themeSettings)}>
+        <CssBaseline /* darken background */ />
+        <div className={clsx('App', classes.root)}>
+          <Paper elevation={0}>
+            <header className="App-header"></header>
+            <main className={classes.main}>
+              <Switch>
+                <Route path="/account">
+                  <Account />
+                </Route>
+                <Route path="/call-history">
+                  <CallHistory />
+                </Route>
+                <Route path="/dialpad">
+                  <Dialpad />
+                </Route>
+                <Route path="/directory">
+                  <Directory />
+                </Route>
+                <Route path="/settings">
+                  <Settings />
+                </Route>
+                <Route path="/sms">
+                  <Sms />
+                </Route>
+                <Route path="/voicemail">
+                  <Voicemail />
+                </Route>
+                <Route path="/">
+                  <Dialpad />
+                </Route>
+              </Switch>
+            </main>
+            <nav className={classes.nav}>
+              <Dialnav setThemeSettings={setThemeSettings} />
+            </nav>
+          </Paper>
+        </div>
+      </ThemeProvider>
+    </BrowserRouter>
   );
 }
 

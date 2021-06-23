@@ -1,35 +1,19 @@
 import React from 'react';
 // import logo from './logo.svg';
-import {
-  makeStyles,
-  Tooltip,
-  TextField,
-  IconButton,
-  Paper,
-} from '@material-ui/core';
-import { ThemedFab } from '../components/ThemedFab';
+import { makeStyles, TextField } from '@material-ui/core';
+import { ThemedFab } from '../../components/ThemedFab';
 import CallIcon from '@material-ui/icons/Call';
 import VoicemailIcon from '@material-ui/icons/Voicemail';
 import PauseIcon from '@material-ui/icons/Pause';
 import MicOffIcon from '@material-ui/icons/MicOff';
 import PhonePausedIcon from '@material-ui/icons/PhonePaused';
-import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
-import HistoryIcon from '@material-ui/icons/History';
-import SmsIcon from '@material-ui/icons/Sms';
 import BackspaceIcon from '@material-ui/icons/Backspace';
 import Brightness2Icon from '@material-ui/icons/Brightness2';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import RotateLeftIcon from '@material-ui/icons/RotateLeft';
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
-import SettingsIcon from '@material-ui/icons/Settings';
-import DialpadIcon from '@material-ui/icons/Dialpad';
-import Brightness6Icon from '@material-ui/icons/Brightness6';
 import clsx from 'clsx';
 
 // @see https://material.io/design/sound/applying-sound-to-ui.html#system-sounds
-import pressSound from '../assets/audio/material_product_sounds/wav/02-Alerts-and-Notifications/notification_simple-01.wav';
-import ringSound from '../assets/audio/material_product_sounds/wav/02-Alerts-and-Notifications/alert_simple.wav';
-import { IThemeSettings } from '../App';
+import pressSound from '../../assets/audio/material_product_sounds/wav/02-Alerts-and-Notifications/notification_simple-01.wav';
+import ringSound from '../../assets/audio/material_product_sounds/wav/02-Alerts-and-Notifications/alert_simple.wav';
 
 const useStyles = makeStyles((theme) => ({
   prompt: {
@@ -38,6 +22,7 @@ const useStyles = makeStyles((theme) => ({
     },
     '& .MuiInput-multiline': {
       lineHeight: 'normal',
+      padding: '6px 0 6px',
     },
     '& textarea': {
       textAlign: 'center',
@@ -55,6 +40,7 @@ const useStyles = makeStyles((theme) => ({
     gridTemplateColumns: 'repeat(3, 1fr)',
     margin: 0,
     padding: 0,
+    justifyItems: 'center',
     '& li': {
       listStyleType: 'none',
     },
@@ -94,51 +80,9 @@ const useStyles = makeStyles((theme) => ({
       marginBottom: 'auto',
     },
   },
-  tab: {
-    // marginLeft: theme.spacing(0.25),
-    // marginRight: theme.spacing(0.25),
-  },
 }));
 
-type TTabType =
-  | 'directory'
-  | 'call-history'
-  | 'dialpad'
-  | 'voicemail'
-  | 'sms'
-  | 'account'
-  | 'reload'
-  | 'help'
-  | 'settings'
-  | 'darkmode';
-
-const tabs: {
-  /** Title for tooltip */
-  title: string;
-  /** List of available tabs */
-  name: TTabType;
-  /** Icon for rendering */
-  Icon: React.FC;
-}[] = [
-  {
-    title: 'Directory',
-    name: 'directory',
-    Icon: SupervisorAccountIcon,
-  },
-  { title: 'Call History', name: 'call-history', Icon: HistoryIcon },
-  { title: 'Dialpad', name: 'dialpad', Icon: DialpadIcon },
-  { title: 'Voicemail', name: 'voicemail', Icon: VoicemailIcon },
-  { title: 'SMS', name: 'sms', Icon: SmsIcon },
-  { title: 'Account', name: 'account', Icon: AccountCircleIcon },
-  { title: 'Reload', name: 'reload', Icon: RotateLeftIcon },
-  { title: 'Help', name: 'help', Icon: HelpOutlineIcon },
-  { title: 'Darkmode', name: 'darkmode', Icon: Brightness6Icon },
-  { title: 'Settings', name: 'settings', Icon: SettingsIcon },
-];
-
-export function Dialer(props: {
-  setThemeSettings: React.Dispatch<React.SetStateAction<IThemeSettings>>;
-}) {
+export function Dialpad(props: { className?: string }) {
   const classes = useStyles();
 
   const dialpad: {
@@ -183,7 +127,7 @@ export function Dialer(props: {
       if (buttonPressAudioRef.current?.currentTime) {
         buttonPressAudioRef.current.currentTime = 0;
       }
-      // buttonPressAudioRef.current?.play();
+      buttonPressAudioRef.current?.play();
       setPrompt((state) => state + symbol);
     };
 
@@ -259,22 +203,8 @@ export function Dialer(props: {
     setPrompt((state) => state.slice(0, state.length - 1));
   };
 
-  const [tabSelected, setTabSelected] = React.useState<TTabType>('dialpad');
-  const tabHandler =
-    (tabName: TTabType) =>
-    (_event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-      if (tabName === 'darkmode') {
-        props.setThemeSettings((state) => ({
-          ...state,
-          themeMode: state.themeMode === 'dark' ? 'light' : 'dark',
-        }));
-      } else {
-        setTabSelected(tabName);
-      }
-    };
-
   return (
-    <Paper elevation={0}>
+    <div className={props.className}>
       <TextField
         className={classes.prompt}
         value={prompt}
@@ -354,22 +284,8 @@ export function Dialer(props: {
           )}
         </li>
       </ul>
-      <aside>
-        {tabs.map((tab) => (
-          <Tooltip key={tab.name} title={tab.title}>
-            <IconButton
-              className={classes.tab}
-              aria-label={tab.name}
-              onClick={tabHandler(tab.name)}
-              color={tabSelected === tab.name ? 'primary' : 'default'}
-            >
-              <tab.Icon />
-            </IconButton>
-          </Tooltip>
-        ))}
-      </aside>
       <audio id="audio" ref={buttonPressAudioRef} src={pressSound}></audio>
       <audio id="audio" ref={ringAudioRef} src={ringSound}></audio>
-    </Paper>
+    </div>
   );
 }
