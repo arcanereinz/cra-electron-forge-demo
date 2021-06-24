@@ -61,8 +61,8 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   main: {
-    minWidth: 252,
     minHeight: 400,
+    minWidth: 252,
   },
   nav: {
     textAlign: 'center',

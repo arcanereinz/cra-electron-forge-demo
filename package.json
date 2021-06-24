@@ -16,15 +16,31 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3"
   },
+  "comments": {
+    "build:watch": "https://stackoverflow.com/questions/42772860/how-to-make-create-react-app-auto-build",
+    "build": "Allow create-react-app to be used with Content-Security-Policy",
+    "build-2": "@see https://drag13.io/posts/react-inline-runtimer-chunk/index.html",
+    "build-3": "@see https://stackoverflow.com/questions/55160698/how-to-use-react-without-unsafe-inline-javascript-css-code",
+    "build-electron": "@see https://github.com/casendler/react-chrome-extension-mv3.git"
+  },
   "scripts": {
     "start-electron": "concurrently -k \"BROWSER=none npm start\" \"npm:electron\"",
     "electron": "wait-on tcp:3000 && electron-forge start",
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "INLINE_RUNTIME_CHUNK=false IMAGE_INLINE_SIZE_LIMIT=0 react-scripts build",
+    "build:watch": "npm-watch",
+    "build-electron": "react-scripts build && electron-forge make",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "package": "react-scripts build && electron-forge package",
-    "make": "react-scripts build && electron-forge make"
+    "package": "react-scripts build && electron-forge package"
+  },
+  "watch": {
+    "build": {
+      "patterns": [
+        "src", "public"
+      ],
+      "extensions": "js,ts,tsx,css,html"
+    }
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -60,6 +76,7 @@
     "concurrently": "^5.2.0",
     "electron": "^9.1.1",
     "electron-devtools-installer": "^3.1.1",
+    "npm-watch": "^0.10.0",
     "typescript": "^4.3.4",
     "wait-on": "^5.1.0"
   },
